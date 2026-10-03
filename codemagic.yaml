@@ -1,0 +1,41 @@
+workflows:
+  android-apk:
+    name: Matriz de Qualificação - Android APK
+    max_build_duration: 30
+    instance_type: linux_x2
+
+    environment:
+      vars:
+        PACKAGE_NAME: "com.wika.matriz"
+
+    scripts:
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
+
+      - name: Prepare Gradle
+        script: |
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            echo "Gradle wrapper JAR not present; using Codemagic's Gradle installation."
+            gradle --version
+          fi
+
+      - name: Build Android APK
+        script: |
+          if [ -f gradle/wrapper/gradle-wrapper.jar ]; then
+            chmod +x ./gradlew
+            ./gradlew clean assembleDebug
+          else
+            gradle clean assembleDebug
+          fi
+
+    artifacts:
+      - app/build/outputs/apk/debug/app-debug.apk
+
+    publishing:
+      email:
+        recipients:
+          - $CM_COMMIT_AUTHOR_EMAIL
+        notify:
+          success: true
+          failure: true
