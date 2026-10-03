@@ -2,7 +2,7 @@ workflows:
   android-apk:
     name: Matriz de Qualificação - Android APK
     max_build_duration: 30
-    instance_type: linux
+    instance_type: mac_mini_m2
 
     environment:
       vars:
@@ -13,21 +13,9 @@ workflows:
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/local.properties"
 
-      - name: Prepare Gradle
-        script: |
-          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            echo "Gradle wrapper JAR not present; using Codemagic's Gradle installation."
-            gradle --version
-          fi
-
       - name: Build Android APK
         script: |
-          if [ -f gradle/wrapper/gradle-wrapper.jar ]; then
-            chmod +x ./gradlew
-            ./gradlew clean assembleDebug
-          else
-            gradle clean assembleDebug
-          fi
+          gradle clean assembleDebug
 
     artifacts:
       - app/build/outputs/apk/debug/app-debug.apk
